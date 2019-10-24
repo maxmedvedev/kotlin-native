@@ -379,7 +379,7 @@ private fun deviceLauncher(project: Project) = object : ExecutorService {
     private fun getTargetUDID(): String {
         val out = ByteArrayOutputStream()
         // FIXME: It seems that idb can't launch idb_companion from the first invoke
-        for (i in 0..1) {
+        for (i in 0..3) {
             project.exec {
                 it.commandLine(idb, "list-targets", "--json")
                 it.standardOutput = out
@@ -389,12 +389,7 @@ private fun deviceLauncher(project: Project) = object : ExecutorService {
         return out.toString().run {
             check(isNotEmpty())
             @Serializable
-            data class DeviceTarget(
-                    val name: String,
-                    val udid: String,
-                    val state: String,
-                    val type: String
-            )
+            data class DeviceTarget(val name: String, val udid: String, val state: String, val type: String)
             split("\n")
                     .filter { it.isNotEmpty() }
                     .map { Json(strictMode = false).parse(DeviceTarget.serializer(), it) }
