@@ -341,11 +341,11 @@ private fun deviceLauncher(project: Project) = object : ExecutorService {
             action.execute(execSpec)
             execSpec.executable = "lldb"
             execSpec.args = commands + "-b" + "-o" + "command script import ${pythonScript()}" +
+                    "-o" + ("process launch" +
+                        execSpec.args.takeUnless { it.isEmpty() }?.let { " -- ${it.joinToString(" ")}" }) +
                     "-o" + "get_exit_code" +
                     "-k" + "get_exit_code" +
-                    "-k" + "exit -1" +
-                    "-o" + ("process launch" +
-                        execSpec.args.takeUnless { it.isEmpty() }?.let { " -- ${it.joinToString(" ")}" })
+                    "-k" + "exit -1"
         }
         uninstall(udid, "org.jetbrains.kotlin.KonanTestLauncher")
         kill()
