@@ -342,8 +342,10 @@ private fun deviceLauncher(project: Project) = object : ExecutorService {
             execSpec.executable = "lldb"
             execSpec.args = commands + "-b" + "-o" + "command script import ${pythonScript()}" +
                     "-o" + ("process launch" +
-                        execSpec.args.takeUnless { it.isEmpty() }?.let { " -- ${it.joinToString(" ")}" }) +
-                    "-o" + "get_exit_code" +
+                        (execSpec.args.takeUnless { it.isEmpty() }
+                                ?.let { " -- ${it.joinToString(" ")}" }
+                                ?: "")) +
+                    "-o" + "get_exit_code"
                     "-k" + "get_exit_code" +
                     "-k" + "exit -1"
             savedOut = execSpec.standardOutput
