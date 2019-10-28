@@ -352,8 +352,8 @@ private fun deviceLauncher(project: Project) = object : ExecutorService {
         out.toString()
                 .also { if (project.verboseTest) println("STDOUT:\n$it") }
                 .split("\n")
-                .run { drop(indexOfFirst { s -> s.startsWith("(lldb) process launch") }) }
-                .filter {
+                .run { drop(indexOfFirst { s -> s.startsWith("(lldb) process launch") } + 1) }
+                .filterNot {
                     it.startsWith("(lldb)") ||
                             it.matches("Process [0-9]* exited with status .*".toRegex()) ||
                             it.matches("Process [0-9]* launched.* ".toRegex())
