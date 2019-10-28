@@ -356,7 +356,7 @@ private fun deviceLauncher(project: Project) = object : ExecutorService {
                 .filterNot {
                     it.startsWith("(lldb)") ||
                             it.matches("Process [0-9]* exited with status .*".toRegex()) ||
-                            it.matches("Process [0-9]* launched.* ".toRegex())
+                            it.matches("Process [0-9]* launched.*".toRegex())
                 }
                 .flatMap { it.toByteArray().toList() }
                 .toTypedArray()
