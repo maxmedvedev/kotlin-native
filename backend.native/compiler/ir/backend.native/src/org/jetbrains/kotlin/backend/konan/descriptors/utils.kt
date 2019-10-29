@@ -6,6 +6,10 @@
 package org.jetbrains.kotlin.backend.konan.descriptors
 
 import org.jetbrains.kotlin.descriptors.*
+import org.jetbrains.kotlin.descriptors.konan.DeserializedKlibModuleOrigin
+import org.jetbrains.kotlin.descriptors.konan.klibModuleOrigin
+import org.jetbrains.kotlin.descriptors.konan.kotlinLibrary
+import org.jetbrains.kotlin.library.BaseKotlinLibrary
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.serialization.deserialization.descriptors.*
 
@@ -47,3 +51,11 @@ fun DeclarationDescriptor.findTopLevelDescriptor(): DeclarationDescriptor {
 
 val ModuleDescriptor.isForwardDeclarationModule get() =
     name == Name.special("<forward declarations>")
+
+// TODO: Is `noir` a really good name for property?
+fun BaseKotlinLibrary.isIrLess() =
+        manifestProperties["noir"] == "true"
+
+fun ModuleDescriptor.isFromIrLessLibrary() =
+        if (klibModuleOrigin !is DeserializedKlibModuleOrigin) false
+        else kotlinLibrary.isIrLess()
