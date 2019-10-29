@@ -1,7 +1,7 @@
 package org.jetbrains.kotlin.backend.konan.ir
 
 import org.jetbrains.kotlin.backend.common.serialization.findPackage
-import org.jetbrains.kotlin.backend.konan.descriptors.isFromIrLessLibrary
+import org.jetbrains.kotlin.backend.konan.descriptors.isFromInteropLibrary
 import org.jetbrains.kotlin.descriptors.PackageFragmentDescriptor
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
@@ -33,7 +33,7 @@ class IrProviderForInteropStubs(
         }
 
     override fun getDeclaration(symbol: IrSymbol): IrDeclaration? =
-            if (symbol.descriptor.module.isFromIrLessLibrary()) {
+            if (symbol.descriptor.module.isFromInteropLibrary()) {
                 provideIrDeclaration(symbol)
             } else {
                 null

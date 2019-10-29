@@ -2,7 +2,7 @@ package org.jetbrains.kotlin.backend.konan.serialization
 
 import org.jetbrains.kotlin.backend.common.LoggingContext
 import org.jetbrains.kotlin.backend.common.serialization.*
-import org.jetbrains.kotlin.backend.konan.descriptors.isFromIrLessLibrary
+import org.jetbrains.kotlin.backend.konan.descriptors.isFromInteropLibrary
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
@@ -20,7 +20,7 @@ private class KonanDeclarationTable(
      * Instead we should get precomputed value from metadata.
      */
     override fun tryComputeBackendSpecificUniqId(declaration: IrDeclaration): UniqId? {
-        return if (declaration.descriptor.module.isFromIrLessLibrary()) {
+        return if (declaration.descriptor.module.isFromInteropLibrary()) {
             UniqId(declaration.descriptor.getUniqId() ?: error("No uniq id found for ${declaration.descriptor}"))
         } else {
             null

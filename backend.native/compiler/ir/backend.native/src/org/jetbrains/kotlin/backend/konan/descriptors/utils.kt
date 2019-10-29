@@ -52,10 +52,9 @@ fun DeclarationDescriptor.findTopLevelDescriptor(): DeclarationDescriptor {
 val ModuleDescriptor.isForwardDeclarationModule get() =
     name == Name.special("<forward declarations>")
 
-// TODO: Is `noir` a really good name for property?
-fun BaseKotlinLibrary.isIrLess() =
-        manifestProperties["noir"] == "true"
+fun BaseKotlinLibrary.isInteropLibrary() =
+        manifestProperties["ir_provider"] == "kotlin.native.cinterop"
 
-fun ModuleDescriptor.isFromIrLessLibrary() =
+fun ModuleDescriptor.isFromInteropLibrary() =
         if (klibModuleOrigin !is DeserializedKlibModuleOrigin) false
-        else kotlinLibrary.isIrLess()
+        else kotlinLibrary.isInteropLibrary()
