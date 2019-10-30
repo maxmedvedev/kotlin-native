@@ -3932,10 +3932,11 @@ task buildKonanTests { t ->
 }
 
 if (PlatformInfo.getTarget(project) == KonanTarget.IOS_ARM64.INSTANCE) {
+    def prepare = ExecutorServiceKt.prepareLauncher(project)
     project.tasks
             .matching { it instanceof KonanTest }
             .forEach {
-                it.dependsOn(ExecutorServiceKt.prepareLauncher(project))
+                it.dependsOn(prepare)
                 it.doFirst(ExecutorServiceKt.xcodeBuild)
             }
 }
