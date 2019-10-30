@@ -1,21 +1,13 @@
 package org.jetbrains.kotlin.backend.konan.ir
 
-import org.jetbrains.kotlin.backend.common.serialization.findPackage
 import org.jetbrains.kotlin.backend.konan.descriptors.isFromInteropLibrary
-import org.jetbrains.kotlin.descriptors.PackageFragmentDescriptor
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
-import org.jetbrains.kotlin.ir.declarations.IrDeclaration
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
-import org.jetbrains.kotlin.ir.declarations.IrFile
-import org.jetbrains.kotlin.ir.declarations.impl.IrFileImpl
-import org.jetbrains.kotlin.ir.declarations.IrFunction
-import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
+import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.declarations.lazy.IrLazyDeclarationBase
+import org.jetbrains.kotlin.ir.declarations.lazy.IrLazyFunction
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
-import org.jetbrains.kotlin.ir.symbols.impl.IrFileSymbolImpl
-import org.jetbrains.kotlin.ir.util.IrProvider
-import org.jetbrains.kotlin.ir.util.SymbolTable
-import org.jetbrains.kotlin.ir.util.TypeTranslator
+import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.resolve.descriptorUtil.module
 
 /**
@@ -24,42 +16,33 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.module
 class IrProviderForInteropStubs(
         private val symbolTable: SymbolTable,
         private val typeTranslator: TypeTranslator
-) : IrProvider {
-    private val interopFakeFiles = mutableMapOf<PackageFragmentDescriptor, IrFile>()
+) : LazyIrProvider {
 
-    private val PackageFragmentDescriptor.fakeFile: IrFile get() = interopFakeFiles.getOrPut(this) {
-            val symbol = IrFileSymbolImpl(this)
-            IrFileImpl(NaiveSourceBasedFileEntryImpl("Pseudo-file for $fqName"), symbol)
-        }
+    override lateinit var declarationStubGenerator: DeclarationStubGenerator
 
-    override fun getDeclaration(symbol: IrSymbol): IrDeclaration? =
+    override fun getDeclaration(symbol: IrSymbol): IrLazyDeclarationBase? =
             if (symbol.descriptor.module.isFromInteropLibrary()) {
                 provideIrDeclaration(symbol)
             } else {
                 null
             }
 
-    private fun provideIrDeclaration(symbol: IrSymbol): IrDeclaration = when (symbol) {
+    private fun provideIrDeclaration(symbol: IrSymbol): IrLazyDeclarationBase = when (symbol) {
         is IrSimpleFunctionSymbol -> provideIrFunction(symbol)
         else -> error("Unsupported interop declaration: symbol=$symbol, descriptor=${symbol.descriptor}")
     }
 
-    private fun provideIrFunction(symbol: IrSimpleFunctionSymbol): IrFunction =
+    private fun provideIrFunction(symbol: IrSimpleFunctionSymbol): IrLazyFunction =
             symbolTable.declareSimpleFunction(
                     UNDEFINED_OFFSET, UNDEFINED_OFFSET,
                     IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB,
-                    symbol.descriptor, this::createExternalFunctionDeclaration
-            )
+                    symbol.descriptor, this::createFunctionDeclaration
+            ) as IrLazyFunction
 
-    private fun createExternalFunctionDeclaration(symbol: IrSimpleFunctionSymbol): IrFunctionImpl {
-        val function = IrFunctionImpl(
-                UNDEFINED_OFFSET, UNDEFINED_OFFSET,
-                IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB, symbol,
-                typeTranslator.translateType(symbol.descriptor.returnType!!)
-        )
-        function.annotations += symbol.descriptor.annotations
-                .mapNotNull(typeTranslator.constantValueGenerator::generateAnnotationConstructorCall)
-        function.parent = symbol.descriptor.findPackage().fakeFile.also { it.declarations += function }
-        return function
-    }
+    private fun createFunctionDeclaration(symbol: IrSimpleFunctionSymbol) =
+            IrLazyFunction(
+                    UNDEFINED_OFFSET, UNDEFINED_OFFSET,
+                    IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB,
+                    symbol, declarationStubGenerator, typeTranslator
+            )
 }
