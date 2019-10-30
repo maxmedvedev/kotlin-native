@@ -21,6 +21,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.tasks.Copy
 import org.gradle.process.ExecResult
 import org.gradle.process.ExecSpec
 import org.gradle.util.ConfigureUtil
@@ -459,6 +460,11 @@ private fun deviceLauncher(project: Project) = object : ExecutorService {
         check(result.exitValue == 0) { "Failed to start debug server: $out" }
         return out.toString()
     }
+}
+
+fun prepareLauncher(project: Project): Copy = project.tasks.create("prepareLauncher", Copy::class.java).apply {
+    from(project.file("iosLauncher"))
+    into(Paths.get(project.testOutputRoot, "launcher"))
 }
 
 val xcodeBuild = Action<KonanTest> { test ->
