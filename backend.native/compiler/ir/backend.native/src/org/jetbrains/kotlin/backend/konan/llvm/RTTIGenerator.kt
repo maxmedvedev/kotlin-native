@@ -6,7 +6,6 @@
 package org.jetbrains.kotlin.backend.konan.llvm
 
 import llvm.*
-import org.jetbrains.kotlin.backend.common.ir.simpleFunctions
 import org.jetbrains.kotlin.backend.konan.*
 import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.descriptors.*
@@ -173,7 +172,7 @@ internal class RTTIGenerator(override val context: Context) : ContextUtils {
             doubleType to 7,
             kInt8Ptr to 8,
             int1Type to 9,
-            vectorType to 10
+            vector16Type to 10
     )
 
     private fun getInstanceSize(classType: LLVMTypeRef?, className: FqName) : Int {
