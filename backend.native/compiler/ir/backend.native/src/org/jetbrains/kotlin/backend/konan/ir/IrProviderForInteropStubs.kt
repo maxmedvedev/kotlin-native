@@ -13,10 +13,7 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.module
 /**
  * Generates external IR declarations for descriptors from interop libraries.
  */
-class IrProviderForInteropStubs(
-        private val symbolTable: SymbolTable,
-        private val typeTranslator: TypeTranslator
-) : LazyIrProvider {
+class IrProviderForInteropStubs : LazyIrProvider {
 
     override lateinit var declarationStubGenerator: DeclarationStubGenerator
 
@@ -33,7 +30,7 @@ class IrProviderForInteropStubs(
     }
 
     private fun provideIrFunction(symbol: IrSimpleFunctionSymbol): IrLazyFunction =
-            symbolTable.declareSimpleFunction(
+            declarationStubGenerator.symbolTable.declareSimpleFunction(
                     UNDEFINED_OFFSET, UNDEFINED_OFFSET,
                     IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB,
                     symbol.descriptor, this::createFunctionDeclaration
@@ -43,6 +40,6 @@ class IrProviderForInteropStubs(
             IrLazyFunction(
                     UNDEFINED_OFFSET, UNDEFINED_OFFSET,
                     IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB,
-                    symbol, declarationStubGenerator, typeTranslator
+                    symbol, declarationStubGenerator, declarationStubGenerator.typeTranslator
             )
 }

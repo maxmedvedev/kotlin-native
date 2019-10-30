@@ -180,8 +180,7 @@ internal val psiToIrPhase = konanUnitPhase(
 
             val functionIrClassFactory = BuiltInFictitiousFunctionIrClassFactory(
                     symbolTable, generatorContext.irBuiltIns, reflectionTypes)
-            val irProviderForInteropStubs = IrProviderForInteropStubs(
-                    generatorContext.symbolTable, generatorContext.typeTranslator)
+            val irProviderForInteropStubs = IrProviderForInteropStubs()
             val symbols = KonanSymbols(this, symbolTable, symbolTable.lazyWrapper, functionIrClassFactory)
             val module = translator.generateModuleFragment(generatorContext, environment.getSourceFiles(),
                     deserializer, listOf(irProviderForInteropStubs, functionIrClassFactory))
