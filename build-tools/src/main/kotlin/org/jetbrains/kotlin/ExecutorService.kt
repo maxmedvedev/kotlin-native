@@ -356,12 +356,11 @@ private fun deviceLauncher(project: Project) = object : ExecutorService {
                 .also { if (project.verboseTest) println("STDOUT:\n$it") }
                 .split("\n")
                 .run { drop(indexOfFirst { s -> s.startsWith("(lldb) process launch") } + 1) }
-                .run { dropLast(size - indexOf("(lldb) get_exit_code")) }
+                .run { dropLast(size -
+                        indexOfFirst { it.matches(".*Process [0-9]* exited with status .*".toRegex()) } + 1)
+                }
                 .map { it.replace("Process [0-9]* exited with status .*".toRegex(), "")
                         .replace("\r", "")   // TODO: investigate: where does the \r comes from
-                }
-                .filterNot {
-                    it.startsWith("(lldb)") || it.matches("Process [0-9]* launched.*".toRegex())
                 }
                 .joinToString("\n")
                 .also {
