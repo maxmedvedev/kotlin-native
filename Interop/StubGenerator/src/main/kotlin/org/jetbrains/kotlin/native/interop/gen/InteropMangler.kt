@@ -23,24 +23,55 @@ interface InteropMangler {
  * Mangler that mimics behaviour of the one from the Kotlin compiler.
  */
 class KotlinLikeInteropMangler : InteropMangler {
+
     override val StructDecl.uniqueSymbolName: String
-        get() = TODO("not implemented")
+        get() = "ktype:"
+
     override val EnumDef.uniqueSymbolName: String
-        get() = TODO("not implemented")
+        get() = "ktype:"
+
     override val ObjCClass.uniqueSymbolName: String
-        get() = TODO("not implemented")
+        get() = "ktype:"
+
     override val ObjCProtocol.uniqueSymbolName: String
-        get() = TODO("not implemented")
+        get() = "ktype:"
+
     override val ObjCCategory.uniqueSymbolName: String
         get() = TODO("not implemented")
+
     override val TypedefDef.uniqueSymbolName: String
-        get() = TODO("not implemented")
+        get() = "ktypealias:"
+
     override val FunctionDecl.uniqueSymbolName: String
-        get() = TODO("not implemented")
+        get() = "kfun:$functionName$signature"
+
     override val ConstantDef.uniqueSymbolName: String
         get() = TODO("not implemented")
+
     override val WrappedMacroDef.uniqueSymbolName: String
         get() = TODO("not implemented")
+
     override val GlobalDecl.uniqueSymbolName: String
         get() = TODO("not implemented")
+
+    private val FunctionDecl.functionName: String
+        get() = name
+
+    private val FunctionDecl.signature: String
+        get() = "${returnType.mangle}${parameters.joinToString { it.type.mangle }}"
+
+    private val Type.mangle: String
+        get() = when (this) {
+            CharType, is BoolType -> "char"
+            is IntegerType -> spelling
+            is FloatingType -> spelling
+            is RecordType -> decl.spelling
+            is EnumType -> def.baseType.mangle
+            is PointerType -> "void*"
+            is ConstArrayType -> elemType.mangle
+            is IncompleteArrayType -> elemType.mangle
+            is Typedef -> def.aliased.mangle
+            is ObjCPointer -> "void*"
+            else -> error("Unexpected type $this")
+        }
 }
